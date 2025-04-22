@@ -16,14 +16,8 @@
 				color: white;
 				padding: 1em 0;
 			}
-			.container {
-				padding: 20px;
-			}
 			.m20 {
 				margin: 20px 0;
-			}
-			.hidden {
-				display: none;
 			}
 			#pump-toggle, #light-toggle {
 				color: white;
@@ -38,8 +32,8 @@
 			<h2>Сити-ферма №1</h1>
 			<h3>Разработчик: Михаил Андросов</h2>
 		</header>
-		<div class="container">
-			<div id="sensor-data" class="m20">
+		<center>
+			<div class="m20">
 				<h2>Показания датчиков</h2>
 				<p>Дата и время: <span id="datetime"></span></p>
 				<p>Температура: <span id="temp">22</span>°C</p>
@@ -50,15 +44,15 @@
 				<p>Уровень EC: <span id="ec">1.5</span> mS/cm</p>
 				<p>Температура раствора: <span id="temp-solution">20</span>°C</p>
 			</div>
-			<div id="system-status" class="m20">
+			<div class="m20">
 				<h2>Состояние системы</h2>
-				<p>Следующий полив: с <span id="watering-start">08:00</span> до <span id="watering-end">08:15</span></p>
-				<p>Подсветка: с <span id="light-start">23:00</span> до <span id="light-end">5:00</span></p>
 				<p>Оптимальные показатели: Температура 22°C, Влажность 60%</p>
+				<p>Следующий полив: с <span id="watering-start">08:00</span> до <span id="watering-end">08:15</span></p>
+				<p>Подсветка: с <span id="lighting-start">23:00</span> до <span id="lighting-end">5:00</span></p>
 			</div>
-			<div id="mode-switch" class="">
+			<div>
 				<h2 id="mode-status">Режим работы: авто</h2>
-				<button id="mode-toggle" onclick="modeToggle()">Переключить режим</button>
+				<button onclick="modeToggle()">Переключить режим</button>
 			</div>
 			<div id="manual-controls" class="m20 hidden">
 				<div>
@@ -72,11 +66,12 @@
 				</div>
 				<br>
 				<div>
-					<label for="lighting-time-start">Подсветка:</label><br>
+					<label>Подсветка:</label>
+					<br>
 					<span>с</span>
-					<input type="time" id="input-light-start" value="23:00">
+					<input type="time" id="input-lighting-start" value="23:00">
 					<span>до</span>
-					<input type="time" id="input-light-end" value="05:00">
+					<input type="time" id="input-lighting-end" value="05:00">
 				</div>
 				<br>
 				<div>
@@ -84,53 +79,75 @@
 					<button onclick="settingsUpdate()">Сохранить</button>
 				</div>
 			</div>
-		</div>
+		</center>
 
 		<script>
-			let settings = {
-				"auto": true,
-				"pump": false,
-				"light": false,
-				"light_start": "23:00",
-				"light_end": "05:00",
-				"watering_time": 15
-			}
 
 			function updateDateTime() {
 				const now = new Date();
 				document.getElementById("datetime").textContent = now.toLocaleString();
 			}
-			updateDateTime();
-			setInterval(updateDateTime, 1000);
 
-			const modeStatus = document.getElementById("mode-status");
-			const manualControls = document.getElementById("manual-controls");
+			let settings = {
+				"auto": true,
+				"pump": false,
+				"light": false,
+				"lighting_start": "23:00",
+				"lighting_end": "05:00",
+				"watering_time": 15
+			}
+
+			const h2ModeStatus = document.getElementById("mode-status");
+			const divManualControls = document.getElementById("manual-controls");			
+			const spanTemp = document.getElementById("temp");
+			const spanHumidity = document.getElementById("humidity");
+			const spanCo2 = document.getElementById("co2");
+			const spanNutrient = document.getElementById("nutrient");
+			const spanPH = document.getElementById("ph");
+			const spanEC = document.getElementById("ec");
+			const spanTempSolution = document.getElementById("temp-solution");
+			const spanWateringStart = document.getElementById("watering-start");
+			const spanWateringEnd = document.getElementById("watering-end");
+			const spanLightingStart = document.getElementById("lighting-start");
+			const spanLightingEnd = document.getElementById("lighting-end");
+			const btnPumpToggle = document.getElementById("pump-toggle");
+			const btnLightToggle = document.getElementById("light-toggle");
+			const inputLightingStart = document.getElementById("input-lighting-start");
+			const inputLightingEnd = document.getElementById("input-lighting-end");
+			const inputWateringTime = document.getElementById("watering-time");
+			
+			divManualControls.style.display = "none";
 
 			function modeToggle() {
-				if (settings.auto) {
-					modeStatus.textContent = "Режим работы: вручную";
-					manualControls.classList.remove("hidden");
-				} else {
-					modeStatus.textContent = "Режим работы: авто";
-					manualControls.classList.add("hidden");
-				}
-				settings.auto = !settings.auto
+				modeCheck();
+				settings.auto = !settings.auto;
+				settingsSave();
 			};
+
+			function modeCheck() {
+				if (settings.auto) {
+					h2ModeStatus.textContent = "Режим работы: авто";
+					divManualControls.style.display = "none";
+				} else {
+					h2ModeStatus.textContent = "Режим работы: вручную";
+					divManualControls.style.display = "block";
+				}				
+			}
 
 			function settingsReset() {
 				settings.auto = true;
 				settings.pump = false;
 				settings.light = false;
-				settings.light_start = "23:00";
-				settings.light_end = "05:00";
+				settings.lighting_start = "23:00";
+				settings.lighting_end = "05:00";
 				settings.watering_time = 15;
 				settingsSave();
 			}
 
 			function settingsUpdate() {
-				settings.light_start = document.getElementById("input-light-start").value;
-				settings.light_end = document.getElementById("input-light-end").value;
-				settings.watering_time = document.getElementById("watering-time").value;
+				settings.lighting_start = inputlightingStart.value;
+				settings.lighting_end = inputLightingEnd.value;
+				settings.watering_time = inputWateringTime.value;
 				settingsSave();
 			}
 
@@ -156,21 +173,29 @@
 			ws.onmessage = function(event) {
 				data = JSON.parse(event.data)
 				console.log(data);
-				document.getElementById("temp").textContent = data.temp;
-				document.getElementById("humidity").textContent = data.humidity;
-				document.getElementById("co2").textContent = data.co2;
-				document.getElementById("nutrient").textContent = data.nutrient;
-				document.getElementById("ph").textContent = data.ph;
-				document.getElementById("ec").textContent = data.ec;
-				document.getElementById("temp-solution").textContent = data.temp_solution;
-				document.getElementById("watering-start").textContent = data.watering_start;
-				document.getElementById("watering-end").textContent = data.watering_end;
-				document.getElementById("light-start").textContent = data.settings.light_start;
-				document.getElementById("light-end").textContent = data.settings.light_end;
-				document.getElementById("pump-toggle").style.backgroundColor = data.settings.pump ? "green" : "red";
-				document.getElementById("light-toggle").style.backgroundColor = data.settings.light ? "green" : "red";
-
-
+				settings = data.settings;
+				spanTemp.textContent = data.temp;
+				spanHumidity.textContent = data.humidity;
+				spanCo2.textContent = data.co2;
+				spanNutrient.textContent = data.nutrient;
+				spanPH.textContent = data.ph;
+				spanEC.textContent = data.ec;
+				spanTempSolution.textContent = data.temp_solution;
+				spanWateringStart.textContent = data.watering_start;
+				spanWateringEnd.textContent = data.watering_end;
+				spanLightingStart.textContent = data.settings.lighting_start;
+				spanLightingEnd.textContent = data.settings.lighting_end;
+				btnPumpToggle.style.backgroundColor = data.settings.pump ? "green" : "red";
+				btnLightToggle.style.backgroundColor = data.settings.light ? "green" : "red";
+				if (data.temp > 30 || data.temp < 10) {
+					spanTemp.parentElement.style.backgroundColor = "red";
+					spanTemp.parentElement.style.color = "white";
+				} else {
+					spanTemp.parentElement.style.backgroundColor = "";
+					spanTemp.parentElement.style.color = "";					
+				}
+				modeCheck();
+				updateDateTime();
 			};
 		</script>
 	</body>

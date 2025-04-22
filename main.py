@@ -16,8 +16,8 @@ settings = {
 	"auto": True,
 	"pump": False,
 	"light": False,
-	"light_start": "23:00",
-	"light_end": "05:00",
+	"lighting_start": "23:00",
+	"lighting_end": "05:00",
 	"watering_time": 15
 }
 
@@ -25,7 +25,7 @@ settings = {
 async def root(request: Request):
 	return templates.TemplateResponse(request=request, name="index.html")
 
-def gen_data():
+def get_sensors_data():
 	return random.choice([{
 		"temp": 100,
 		"humidity": 60,
@@ -80,7 +80,7 @@ async def websocket_endpoint(websocket: WebSocket):
 	await websocket.accept()
 	try:
 		while True:
-			response = gen_data()
+			response = get_sensors_data()
 			await websocket.send_text(json.dumps(response))
 			await asyncio.sleep(1)
 	except WebSocketDisconnect:
@@ -107,8 +107,10 @@ async def toggle_device(request: Request):
 
 @app.post("/settings-update")
 async def settings_update(request: Request):
+	global settings
 	data = await request.json()
 	settings = data.get("settings")
+	print(settings)
 	return JSONResponse(content={"status": "success", "msg": "Settings updated"})
 
 if __name__ == "__main__":
